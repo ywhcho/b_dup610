@@ -120,13 +120,13 @@ def _parse_dose_info(dose_text):
 
 
 def _parse_ingredient_entry(entry):
-    if ':' in entry:
-        ingredient, dose_raw = entry.split(':', 1)
-    else:
-        ingredient, dose_raw = entry, ''
+    parts = entry.split(':', 2)
+    ingredient = parts[0]
+    dose_raw = parts[1] if len(parts) > 1 else ''
+    max_daily_dose = parts[2].strip() if len(parts) > 2 else ''
     ingredient = ingredient.strip()
     dose_display, dose_value, dose_unit = _parse_dose_info(dose_raw)
-    return ingredient, dose_display, dose_value, dose_unit
+    return ingredient, dose_display, dose_value, dose_unit, max_daily_dose
 
 
 def _normalize_mass_unit(unit):
@@ -181,13 +181,14 @@ def compare_ingredients(selected_names):
             ingreds = {}
             for med in meds:
                 for entry in _split_ingredient_entries(med.e2iact_t): #cyfr:ok:ingred:260610
-                    ingredient, dose_display, dose_value, dose_unit = _parse_ingredient_entry(entry)
+                    ingredient, dose_display, dose_value, dose_unit, max_daily_dose = _parse_ingredient_entry(entry)
                     if not ingredient:
                         continue
                     ingreds[ingredient] = {
                         'dose_display': dose_display,
                         'dose_value': dose_value,
                         'dose_unit': dose_unit,
+                        'max_daily_dose': max_daily_dose,
                     }
             medicines_data[name] = sorted(
                 [
@@ -201,6 +202,7 @@ def compare_ingredients(selected_names):
                 detail = {
                     'medicine': name,
                     'dose': dose_data['dose_display'] or '-',
+                    'max_daily_dose': dose_data['max_daily_dose'],
                 }
                 usage['details'].append(detail)
 
@@ -228,6 +230,11 @@ def compare_ingredients(selected_names):
                 'ingredient': ingredient,
                 'count': len(details),
                 'total_dose': total_dose,
+                'max_daily_doses': [
+                    detail['max_daily_dose']
+                    for detail in details
+                    if detail['max_daily_dose']
+                ],
                 'details': details,
             }
         )

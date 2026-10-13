@@ -190,7 +190,7 @@
           <ul class="mb-0 mt-2">
             {% for item in comparison_result.duplicate_ingreds %}
               <li class="mb-2">
-                <strong>{{ item.ingredient }}</strong> ({{ item.count }}개) 함량계: {{ item.total_dose }}
+                <strong>{{ item.ingredient }}</strong> ({{ item.count }}개) 함량계: {{ item.total_dose }}{% if item.max_daily_doses %} ({{ item.max_daily_doses|join:", " }}){% endif %}
                 <ul class="mt-1 mb-0">
                   {% for detail in item.details %}
                     <li>{{ detail.medicine }} {{ detail.dose }}</li>
