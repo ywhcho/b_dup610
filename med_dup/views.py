@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from medicines.models import DrugInfo, Medicine
-from med_interaction.views import check_interactions
+from med_interaction.views import RISK_FILTER_OPTIONS, check_interactions
 import re
 
 MASS_UNIT_FACTORS_TO_MCG = {
@@ -67,6 +67,8 @@ def duplicate_check(request):
         'selected_page_rows': selected_page_rows,
         'selected': selected,
         'comparison_result': comparison_result,
+        'risk_filter_options': RISK_FILTER_OPTIONS,
+        'selected_risk_filter': request.session.get('selected_interaction_risk_filter', ''),
     }
     return render(request, 'med_dup/duplicate_check.html', context)
 
@@ -74,11 +76,17 @@ def duplicate_check(request):
 def interaction_popup(request):
     """선택된 약품 목록으로 상호작용 결과를 팝업 창으로 보여주기"""
     selected = request.session.get('selected_medicines', [])
+    selected_risk_filter = request.GET.get('risk_filter', '').strip().upper()
+    if selected_risk_filter not in {value for value, _ in RISK_FILTER_OPTIONS}:
+        selected_risk_filter = ''
+    request.session['selected_interaction_risk_filter'] = selected_risk_filter
     interaction_result = None
     if len(selected) >= 2:
-        interaction_result = check_interactions(selected)
+        interaction_result = check_interactions(selected, selected_risk_filter)
     context = {
         'selected': selected,
+        'risk_filter_options': RISK_FILTER_OPTIONS,
+        'selected_risk_filter': selected_risk_filter,
         'interaction_result': interaction_result,
     }
     return render(request, 'med_dup/interaction_popup.html', context)

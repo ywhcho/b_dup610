@@ -11,6 +11,18 @@
   <div class="alert alert-warning">선택된 약품이 없습니다.</div>
 {% endif %}
 
+<form method="get" class="row g-2 align-items-end mb-3">
+  <div class="col-auto">
+    <label for="risk-filter" class="form-label">위험도</label>
+    <select id="risk-filter" name="risk_filter" class="form-select">
+      {% for value, label in risk_filter_options %}
+        <option value="{{ value }}" {% if selected_risk_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><button type="submit" class="btn btn-warning">적용</button></div>
+</form>
+
 {% if interaction_result %}
   {% if interaction_result.error %}
     <div class="alert alert-warning">{{ interaction_result.error }}</div>
